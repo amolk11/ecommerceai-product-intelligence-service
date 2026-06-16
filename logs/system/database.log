@@ -1,0 +1,5 @@
+2026-06-16 14:04:48,178 | INFO | system.database | Creating session factory
+2026-06-16 14:04:48,179 | ERROR | system.database | DB_URL is not configured
+2026-06-16 14:06:13,038 | INFO | system.database | Creating session factory
+2026-06-16 14:06:13,039 | INFO | system.database | Creating database engine
+2026-06-16 14:06:13,454 | INFO | system.database | Database engine created successfully
