@@ -7,5 +7,5 @@ class RankingMetric(str, Enum):
     REACH = "reach"
     BASKET_INFLUENCE = "basket_influence"
     PURCHASE_INTENT = "purchase_intent"
-    HEALTH = "health"
+    PERFORMANCE = "performance"
     

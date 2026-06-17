@@ -29,7 +29,7 @@ class ProductIntelligenceRepository(ABC):
         offset: int,
         department: str | None = None,
         aisle: str | None = None,
-        health_segment: str | None = None,
+        performance_segment: str | None = None,
     ) -> tuple[list[ProductIntelligence], int]:
         raise NotImplementedError
 

@@ -1,4 +1,6 @@
 from pydantic import BaseModel
+from pydantic import ConfigDict
+from pydantic import Field
 
 from app.schemas.requests import RankingMetric
 
@@ -24,7 +26,13 @@ class GlobalScores(BaseModel):
     reach_score: float
     basket_influence_score: float
     purchase_intent_score: float
-    health_score: float
+    performance_score: float = Field(
+        examples=[97.2],
+        description=(
+            "Overall business performance score derived from commercial "
+            "strength signals."
+        ),
+    )
 
 
 class DepartmentScores(BaseModel):
@@ -33,7 +41,10 @@ class DepartmentScores(BaseModel):
     reach_score: float
     basket_influence_score: float
     purchase_intent_score: float
-    health_score: float
+    performance_score: float = Field(
+        examples=[91.6],
+        description="Department-relative business performance score.",
+    )
 
 
 class ProductSegments(BaseModel):
@@ -42,7 +53,10 @@ class ProductSegments(BaseModel):
     reach: str
     basket_influence: str
     purchase_intent: str
-    health: str
+    performance: str = Field(
+        examples=["Star Product"],
+        description="Business performance segment for the product.",
+    )
 
 
 class ProductInsights(BaseModel):
@@ -65,11 +79,39 @@ class ProductListItem(BaseModel):
     product_name: str
     department: str
     aisle: str
-    health_score: float
-    health_segment: str
+    performance_score: float = Field(
+        examples=[97.2],
+        description="Overall business performance score.",
+    )
+    performance_segment: str = Field(
+        examples=["Star Product"],
+        description="Business performance segment.",
+    )
 
 
 class ProductListResponse(BaseModel):
+    model_config = ConfigDict(
+        json_schema_extra={
+            "examples": [
+                {
+                    "items": [
+                        {
+                            "product_id": 101,
+                            "product_name": "Organic Bananas",
+                            "department": "produce",
+                            "aisle": "fresh fruits",
+                            "performance_score": 97.2,
+                            "performance_segment": "Star Product",
+                        }
+                    ],
+                    "total": 1,
+                    "limit": 20,
+                    "offset": 0,
+                }
+            ]
+        }
+    )
+
     items: list[ProductListItem]
     total: int
     limit: int

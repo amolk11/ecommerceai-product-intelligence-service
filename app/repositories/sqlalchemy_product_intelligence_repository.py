@@ -17,7 +17,7 @@ METRIC_COLUMN_MAP = {
     "reach": ProductIntelligence.global_reach_score,
     "basket_influence": ProductIntelligence.global_basket_influence_score,
     "purchase_intent": ProductIntelligence.global_purchase_intent_score,
-    "health": ProductIntelligence.global_health_score,
+    "performance": ProductIntelligence.global_health_score,
 }
 
 
@@ -94,19 +94,19 @@ class SQLAlchemyProductIntelligenceRepository(
         offset: int,
         department: str | None = None,
         aisle: str | None = None,
-        health_segment: str | None = None,
+        performance_segment: str | None = None,
     ) -> tuple[list[ProductIntelligence], int]:
 
         logger.debug(
             (
                 "Querying products limit=%s offset=%s department=%s "
-                "aisle=%s health_segment=%s"
+                "aisle=%s performance_segment=%s"
             ),
             limit,
             offset,
             department,
             aisle,
-            health_segment,
+            performance_segment,
         )
 
         query = self.db.query(
@@ -125,10 +125,10 @@ class SQLAlchemyProductIntelligenceRepository(
                 == aisle
             )
 
-        if health_segment:
+        if performance_segment:
             query = query.filter(
                 ProductIntelligence.health_segment
-                == health_segment
+                == performance_segment
             )
 
         total = query.with_entities(

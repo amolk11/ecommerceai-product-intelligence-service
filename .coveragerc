@@ -1,0 +1,15 @@
+[run]
+branch = True
+source = app
+omit =
+    app/models/*
+    app/schemas/*
+
+[report]
+show_missing = True
+skip_covered = True
+fail_under = 85
+
+[paths]
+source =
+    app

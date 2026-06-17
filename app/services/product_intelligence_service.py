@@ -79,7 +79,7 @@ class ProductIntelligenceService:
                 reach_score=record.global_reach_score,
                 basket_influence_score=record.global_basket_influence_score,
                 purchase_intent_score=record.global_purchase_intent_score,
-                health_score=record.global_health_score,
+                performance_score=record.global_health_score,
             ),
             department_scores=DepartmentScores(
                 popularity_score=record.department_popularity_score,
@@ -87,7 +87,7 @@ class ProductIntelligenceService:
                 reach_score=record.department_reach_score,
                 basket_influence_score=record.department_basket_influence_score,
                 purchase_intent_score=record.department_purchase_intent_score,
-                health_score=record.department_health_score,
+                performance_score=record.department_health_score,
             ),
             segments=ProductSegments(
                 popularity=record.popularity_segment,
@@ -95,7 +95,7 @@ class ProductIntelligenceService:
                 reach=record.reach_segment,
                 basket_influence=record.basket_segment,
                 purchase_intent=record.purchase_intent_segment,
-                health=record.health_segment,
+                performance=record.health_segment,
             ),
             insights=ProductInsights(
                 primary_strength=record.primary_strength,
@@ -140,19 +140,19 @@ class ProductIntelligenceService:
         offset: int,
         department: str | None = None,
         aisle: str | None = None,
-        health_segment: str | None = None,
+        performance_segment: str | None = None,
     ) -> ProductListResponse:
 
         logger.debug(
             (
                 "Fetching products limit=%s offset=%s department=%s "
-                "aisle=%s health_segment=%s"
+                "aisle=%s performance_segment=%s"
             ),
             limit,
             offset,
             department,
             aisle,
-            health_segment,
+            performance_segment,
         )
 
         rows, total = self.repository.get_products(
@@ -160,7 +160,7 @@ class ProductIntelligenceService:
             offset=offset,
             department=department,
             aisle=aisle,
-            health_segment=health_segment,
+            performance_segment=performance_segment,
         )
 
         items = [
@@ -169,8 +169,8 @@ class ProductIntelligenceService:
                 product_name=row.product_name,
                 department=row.department,
                 aisle=row.aisle,
-                health_score=row.global_health_score,
-                health_segment=row.health_segment,
+                performance_score=row.global_health_score,
+                performance_segment=row.health_segment,
             )
             for row in rows
         ]
@@ -215,7 +215,7 @@ class ProductIntelligenceService:
             RankingMetric.PURCHASE_INTENT: (
                 "global_purchase_intent_score"
             ),
-            RankingMetric.HEALTH: "global_health_score",
+            RankingMetric.PERFORMANCE: "global_health_score",
         }
 
         score_field = score_field_map[metric]

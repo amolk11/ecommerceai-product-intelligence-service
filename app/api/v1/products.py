@@ -35,6 +35,10 @@ router = APIRouter(
     "",
     response_model=ProductListResponse,
     summary="Get Products",
+    description=(
+        "Retrieve paginated products with business performance score "
+        "and segment fields."
+    ),
 )
 def get_products(
     limit: int = Query(
@@ -48,7 +52,11 @@ def get_products(
     ),
     department: str | None = None,
     aisle: str | None = None,
-    health_segment: str | None = None,
+    performance_segment: str | None = Query(
+        default=None,
+        description="Filter by business performance segment.",
+        examples=["Star Product"],
+    ),
     service: ProductIntelligenceService = Depends(
         get_product_intelligence_service,
     ),
@@ -60,13 +68,13 @@ def get_products(
     logger.info(
         (
             "Listing products limit=%s offset=%s department=%s "
-            "aisle=%s health_segment=%s"
+            "aisle=%s performance_segment=%s"
         ),
         limit,
         offset,
         department,
         aisle,
-        health_segment,
+        performance_segment,
     )
 
     response = service.get_products(
@@ -74,7 +82,7 @@ def get_products(
         offset=offset,
         department=department,
         aisle=aisle,
-        health_segment=health_segment,
+        performance_segment=performance_segment,
     )
 
     logger.info(
@@ -90,6 +98,7 @@ def get_products(
     "/top",
     response_model=TopProductsResponse,
     summary="Get Top Products",
+    description="Retrieve top-ranked products for a commercial metric.",
 )
 def get_top_products(
     metric: RankingMetric,
@@ -103,7 +112,7 @@ def get_top_products(
     ),
 ) -> TopProductsResponse:
     """
-    Retrieve top-ranked products for a metric.
+    Retrieve top-ranked products for a commercial metric.
     """
 
     logger.info(
