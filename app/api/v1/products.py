@@ -5,7 +5,7 @@ from app.dependencies.product_intelligence import (
 )
 
 from app.schemas.requests import RankingMetric
-
+from app.core.config import settings
 from app.schemas.responses import (
     ProductInsightsResponse,
     ProductListResponse,
@@ -76,7 +76,7 @@ def get_products(
         aisle,
         performance_segment,
     )
-
+        
     response = service.get_products(
         limit=limit,
         offset=offset,
