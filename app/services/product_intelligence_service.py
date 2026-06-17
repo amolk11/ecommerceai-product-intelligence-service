@@ -1,3 +1,4 @@
+from app.core.logger import get_logger
 from app.repositories.interfaces.product_intelligence_repository import (
     ProductIntelligenceRepository,
 )
@@ -19,6 +20,12 @@ from app.schemas.responses import (
 )
 
 
+logger = get_logger(
+    log_name="product_intelligence",
+    log_folder="services",
+)
+
+
 class ProductIntelligenceService:
     def __init__(
         self,
@@ -31,12 +38,26 @@ class ProductIntelligenceService:
         product_id: int,
     ) -> ProductProfileResponse | None:
 
+        logger.debug(
+            "Fetching product profile product_id=%s",
+            product_id,
+        )
+
         record = self.repository.get_product_profile(
             product_id=product_id,
         )
 
         if record is None:
+            logger.info(
+                "Product profile missing product_id=%s",
+                product_id,
+            )
             return None
+
+        logger.debug(
+            "Mapping product profile product_id=%s",
+            product_id,
+        )
 
         return ProductProfileResponse(
             identity=ProductIdentity(
@@ -88,11 +109,20 @@ class ProductIntelligenceService:
         product_id: int,
     ) -> ProductInsightsResponse | None:
 
+        logger.debug(
+            "Fetching product insights product_id=%s",
+            product_id,
+        )
+
         record = self.repository.get_product_insights(
             product_id=product_id,
         )
 
         if record is None:
+            logger.info(
+                "Product insights missing product_id=%s",
+                product_id,
+            )
             return None
 
         return ProductInsightsResponse(
@@ -112,6 +142,18 @@ class ProductIntelligenceService:
         aisle: str | None = None,
         health_segment: str | None = None,
     ) -> ProductListResponse:
+
+        logger.debug(
+            (
+                "Fetching products limit=%s offset=%s department=%s "
+                "aisle=%s health_segment=%s"
+            ),
+            limit,
+            offset,
+            department,
+            aisle,
+            health_segment,
+        )
 
         rows, total = self.repository.get_products(
             limit=limit,
@@ -133,6 +175,12 @@ class ProductIntelligenceService:
             for row in rows
         ]
 
+        logger.debug(
+            "Mapped products count=%s total=%s",
+            len(items),
+            total,
+        )
+
         return ProductListResponse(
             items=items,
             total=total,
@@ -145,6 +193,12 @@ class ProductIntelligenceService:
         metric: RankingMetric,
         limit: int,
     ) -> TopProductsResponse:
+
+        logger.debug(
+            "Fetching top products metric=%s limit=%s",
+            metric,
+            limit,
+        )
 
         rows = self.repository.get_top_products(
             metric=metric.value,
@@ -175,6 +229,12 @@ class ProductIntelligenceService:
             )
             for index, row in enumerate(rows)
         ]
+
+        logger.debug(
+            "Mapped top products metric=%s count=%s",
+            metric,
+            len(products),
+        )
 
         return TopProductsResponse(
             metric=metric,

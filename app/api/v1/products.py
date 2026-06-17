@@ -1,7 +1,4 @@
-from fastapi import APIRouter
-from fastapi import Depends
-from fastapi import HTTPException
-from fastapi import Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 
 from app.dependencies.product_intelligence import (
     get_product_intelligence_service,
@@ -18,6 +15,14 @@ from app.schemas.responses import (
 
 from app.services.product_intelligence_service import (
     ProductIntelligenceService,
+)
+
+from app.core.logger import get_logger
+
+
+logger = get_logger(
+    log_name="products",
+    log_folder="api",
 )
 
 router = APIRouter(
@@ -52,13 +57,33 @@ def get_products(
     Retrieve paginated products.
     """
 
-    return service.get_products(
+    logger.info(
+        (
+            "Listing products limit=%s offset=%s department=%s "
+            "aisle=%s health_segment=%s"
+        ),
+        limit,
+        offset,
+        department,
+        aisle,
+        health_segment,
+    )
+
+    response = service.get_products(
         limit=limit,
         offset=offset,
         department=department,
         aisle=aisle,
         health_segment=health_segment,
     )
+
+    logger.info(
+        "Listed products count=%s total=%s",
+        len(response.items),
+        response.total,
+    )
+
+    return response
 
 
 @router.get(
@@ -81,10 +106,24 @@ def get_top_products(
     Retrieve top-ranked products for a metric.
     """
 
-    return service.get_top_products(
+    logger.info(
+        "Listing top products metric=%s limit=%s",
+        metric,
+        limit,
+    )
+
+    response = service.get_top_products(
         metric=metric,
         limit=limit,
     )
+
+    logger.info(
+        "Listed top products metric=%s count=%s",
+        metric,
+        len(response.products),
+    )
+
+    return response
 
 
 @router.get(
@@ -107,10 +146,19 @@ def get_product_profile(
     )
 
     if product is None:
+        logger.warning(
+            "Product profile not found product_id=%s",
+            product_id,
+        )
         raise HTTPException(
             status_code=404,
             detail=f"Product {product_id} not found",
         )
+
+    logger.info(
+        "Retrieved product profile product_id=%s",
+        product_id,
+    )
 
     return product
 
@@ -135,9 +183,18 @@ def get_product_insights(
     )
 
     if insights is None:
+        logger.warning(
+            "Product insights not found product_id=%s",
+            product_id,
+        )
         raise HTTPException(
             status_code=404,
             detail=f"Product {product_id} not found",
         )
+
+    logger.info(
+        "Retrieved product insights product_id=%s",
+        product_id,
+    )
 
     return insights

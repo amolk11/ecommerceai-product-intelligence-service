@@ -1,6 +1,7 @@
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
+from app.core.logger import get_logger
 from app.models.product_intelligence import (
     ProductIntelligence,
 )
@@ -20,6 +21,12 @@ METRIC_COLUMN_MAP = {
 }
 
 
+logger = get_logger(
+    log_name="product_intelligence",
+    log_folder="repositories",
+)
+
+
 class SQLAlchemyProductIntelligenceRepository(
     ProductIntelligenceRepository
 ):
@@ -34,26 +41,52 @@ class SQLAlchemyProductIntelligenceRepository(
         product_id: int,
     ) -> ProductIntelligence | None:
 
-        return (
+        logger.debug(
+            "Querying product profile product_id=%s",
+            product_id,
+        )
+
+        product = (
             self.db.query(ProductIntelligence)
             .filter(
                 ProductIntelligence.product_id == product_id
             )
             .first()
         )
+
+        logger.debug(
+            "Queried product profile product_id=%s found=%s",
+            product_id,
+            product is not None,
+        )
+
+        return product
 
     def get_product_insights(
         self,
         product_id: int,
     ) -> ProductIntelligence | None:
 
-        return (
+        logger.debug(
+            "Querying product insights product_id=%s",
+            product_id,
+        )
+
+        product = (
             self.db.query(ProductIntelligence)
             .filter(
                 ProductIntelligence.product_id == product_id
             )
             .first()
         )
+
+        logger.debug(
+            "Queried product insights product_id=%s found=%s",
+            product_id,
+            product is not None,
+        )
+
+        return product
 
     def get_products(
         self,
@@ -63,6 +96,18 @@ class SQLAlchemyProductIntelligenceRepository(
         aisle: str | None = None,
         health_segment: str | None = None,
     ) -> tuple[list[ProductIntelligence], int]:
+
+        logger.debug(
+            (
+                "Querying products limit=%s offset=%s department=%s "
+                "aisle=%s health_segment=%s"
+            ),
+            limit,
+            offset,
+            department,
+            aisle,
+            health_segment,
+        )
 
         query = self.db.query(
             ProductIntelligence
@@ -101,6 +146,12 @@ class SQLAlchemyProductIntelligenceRepository(
             .all()
         )
 
+        logger.debug(
+            "Queried products count=%s total=%s",
+            len(products),
+            total,
+        )
+
         return products, total
 
     def get_top_products(
@@ -114,14 +165,32 @@ class SQLAlchemyProductIntelligenceRepository(
         )
 
         if score_column is None:
+            logger.warning(
+                "Unsupported product ranking metric metric=%s",
+                metric,
+            )
             raise ValueError(
                 f"Unsupported metric: {metric}"
             )
 
-        return (
+        logger.debug(
+            "Querying top products metric=%s limit=%s",
+            metric,
+            limit,
+        )
+
+        products = (
             self.db.query(ProductIntelligence)
             .order_by(score_column.desc())
             .limit(limit)
             .all()
         )
+
+        logger.debug(
+            "Queried top products metric=%s count=%s",
+            metric,
+            len(products),
+        )
+
+        return products
         

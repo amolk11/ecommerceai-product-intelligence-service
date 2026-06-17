@@ -16,6 +16,13 @@ class Settings(BaseSettings):
 
     startup_validation_enabled: bool = True
 
+    log_level: str = "INFO"
+    log_dir: str = "logs"
+    log_to_console: bool = True
+    log_to_file: bool = True
+    log_file_max_bytes: int = 10 * 1024 * 1024
+    log_file_backup_count: int = 5
+
     model_config = SettingsConfigDict(
         env_file=".env",
         extra="ignore",

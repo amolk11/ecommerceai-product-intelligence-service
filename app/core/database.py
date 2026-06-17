@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.orm import sessionmaker
 
 from app.core.config import settings
-from app.core.logging import get_logger
+from app.core.logger import get_logger
 
 logger = get_logger(
     log_name="database",
