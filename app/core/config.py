@@ -7,7 +7,7 @@ class Settings(BaseSettings):
     environment: str = "local"
 
     db_url: str | None = None
-    
+
     cache_enabled: bool = True
 
     redis_host: str = "localhost"

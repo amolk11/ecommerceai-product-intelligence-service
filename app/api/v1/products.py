@@ -76,7 +76,7 @@ def get_products(
         aisle,
         performance_segment,
     )
-        
+
     response = service.get_products(
         limit=limit,
         offset=offset,
