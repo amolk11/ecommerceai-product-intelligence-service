@@ -209,12 +209,8 @@ class ProductIntelligenceService:
             RankingMetric.POPULARITY: "global_popularity_score",
             RankingMetric.LOYALTY: "global_loyalty_score",
             RankingMetric.REACH: "global_reach_score",
-            RankingMetric.BASKET_INFLUENCE: (
-                "global_basket_influence_score"
-            ),
-            RankingMetric.PURCHASE_INTENT: (
-                "global_purchase_intent_score"
-            ),
+            RankingMetric.BASKET_INFLUENCE: ("global_basket_influence_score"),
+            RankingMetric.PURCHASE_INTENT: ("global_purchase_intent_score"),
             RankingMetric.PERFORMANCE: "global_health_score",
         }
 
@@ -240,4 +236,3 @@ class ProductIntelligenceService:
             metric=metric,
             products=products,
         )
-        

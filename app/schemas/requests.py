@@ -8,4 +8,3 @@ class RankingMetric(str, Enum):
     BASKET_INFLUENCE = "basket_influence"
     PURCHASE_INTENT = "purchase_intent"
     PERFORMANCE = "performance"
-    

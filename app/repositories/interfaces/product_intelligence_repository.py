@@ -40,4 +40,3 @@ class ProductIntelligenceRepository(ABC):
         limit: int,
     ) -> list[ProductIntelligence]:
         raise NotImplementedError
-    

@@ -27,9 +27,7 @@ logger = get_logger(
 )
 
 
-class SQLAlchemyProductIntelligenceRepository(
-    ProductIntelligenceRepository
-):
+class SQLAlchemyProductIntelligenceRepository(ProductIntelligenceRepository):
     def __init__(
         self,
         db: Session,
@@ -48,9 +46,7 @@ class SQLAlchemyProductIntelligenceRepository(
 
         product = (
             self.db.query(ProductIntelligence)
-            .filter(
-                ProductIntelligence.product_id == product_id
-            )
+            .filter(ProductIntelligence.product_id == product_id)
             .first()
         )
 
@@ -74,9 +70,7 @@ class SQLAlchemyProductIntelligenceRepository(
 
         product = (
             self.db.query(ProductIntelligence)
-            .filter(
-                ProductIntelligence.product_id == product_id
-            )
+            .filter(ProductIntelligence.product_id == product_id)
             .first()
         )
 
@@ -109,38 +103,23 @@ class SQLAlchemyProductIntelligenceRepository(
             performance_segment,
         )
 
-        query = self.db.query(
-            ProductIntelligence
-        )
+        query = self.db.query(ProductIntelligence)
 
         if department:
-            query = query.filter(
-                ProductIntelligence.department
-                == department
-            )
+            query = query.filter(ProductIntelligence.department == department)
 
         if aisle:
-            query = query.filter(
-                ProductIntelligence.aisle
-                == aisle
-            )
+            query = query.filter(ProductIntelligence.aisle == aisle)
 
         if performance_segment:
             query = query.filter(
-                ProductIntelligence.health_segment
-                == performance_segment
+                ProductIntelligence.health_segment == performance_segment
             )
 
-        total = query.with_entities(
-            func.count(
-                ProductIntelligence.product_id
-            )
-        ).scalar()
+        total = query.with_entities(func.count(ProductIntelligence.product_id)).scalar()
 
         products = (
-            query.order_by(
-                ProductIntelligence.global_health_score.desc()
-            )
+            query.order_by(ProductIntelligence.global_health_score.desc())
             .offset(offset)
             .limit(limit)
             .all()
@@ -160,18 +139,14 @@ class SQLAlchemyProductIntelligenceRepository(
         limit: int,
     ) -> list[ProductIntelligence]:
 
-        score_column = METRIC_COLUMN_MAP.get(
-            metric
-        )
+        score_column = METRIC_COLUMN_MAP.get(metric)
 
         if score_column is None:
             logger.warning(
                 "Unsupported product ranking metric metric=%s",
                 metric,
             )
-            raise ValueError(
-                f"Unsupported metric: {metric}"
-            )
+            raise ValueError(f"Unsupported metric: {metric}")
 
         logger.debug(
             "Querying top products metric=%s limit=%s",
@@ -193,4 +168,3 @@ class SQLAlchemyProductIntelligenceRepository(
         )
 
         return products
-        

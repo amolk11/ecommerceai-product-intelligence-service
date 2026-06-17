@@ -98,4 +98,3 @@ class ProductIntelligence(Base):
     primary_weakness: Mapped[str] = mapped_column(String)
 
     recommended_action: Mapped[str] = mapped_column(String)
-    

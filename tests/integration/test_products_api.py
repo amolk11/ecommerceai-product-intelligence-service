@@ -26,9 +26,7 @@ def test_get_products_filters_by_department(db_client):
 
 
 def test_get_products_filters_by_performance_segment(db_client):
-    response = db_client.get(
-        "/api/v1/products?performance_segment=Star Product"
-    )
+    response = db_client.get("/api/v1/products?performance_segment=Star Product")
 
     assert response.status_code == 200
     payload = response.json()
@@ -37,9 +35,7 @@ def test_get_products_filters_by_performance_segment(db_client):
 
 
 def test_get_top_products_uses_performance_metric(db_client):
-    response = db_client.get(
-        "/api/v1/products/top?metric=performance&limit=2"
-    )
+    response = db_client.get("/api/v1/products/top?metric=performance&limit=2")
 
     assert response.status_code == 200
     payload = response.json()

@@ -133,4 +133,3 @@ class TopProductsResponse(BaseModel):
 class ProductInsightsResponse(BaseModel):
     product_id: int
     insights: ProductInsights
-    

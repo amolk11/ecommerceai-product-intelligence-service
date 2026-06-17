@@ -60,10 +60,7 @@ async def log_requests(request: Request, call_next):
         response.headers["x-request-id"] = request_id
 
         logger.info(
-            (
-                "Request completed method=%s path=%s "
-                "status_code=%s duration_ms=%.2f"
-            ),
+            ("Request completed method=%s path=%s " "status_code=%s duration_ms=%.2f"),
             request.method,
             request.url.path,
             response.status_code,

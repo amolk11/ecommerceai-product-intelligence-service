@@ -23,9 +23,7 @@ def _create_engine() -> Engine:
 
     if not settings.db_url:
         logger.error("DB_URL is not configured")
-        raise RuntimeError(
-            "DB_URL is required for database access"
-        )
+        raise RuntimeError("DB_URL is required for database access")
 
     logger.info("Creating database engine")
 
@@ -82,12 +80,9 @@ def get_session() -> Generator[Session, None, None]:
         yield session
 
     except Exception:
-        logger.exception(
-            "Database session failed"
-        )
+        logger.exception("Database session failed")
         session.rollback()
         raise
 
     finally:
         session.close()
-        

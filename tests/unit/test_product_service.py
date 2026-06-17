@@ -56,9 +56,7 @@ def test_get_product_insights_maps_insight_generation_fields(
     response = product_service.get_product_insights(product_id=101)
 
     assert response.product_id == 101
-    assert response.insights.primary_strength == (
-        "High repeat purchase behavior"
-    )
+    assert response.insights.primary_strength == ("High repeat purchase behavior")
     assert response.insights.primary_weakness == "Limited cross-category reach"
     assert response.insights.recommended_action == "Increase premium placement"
 

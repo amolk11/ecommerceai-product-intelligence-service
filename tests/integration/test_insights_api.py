@@ -10,12 +10,8 @@ def test_get_product_insights_returns_insight_fields(db_client):
     assert response.status_code == 200
     payload = response.json()
     assert payload["product_id"] == 101
-    assert payload["insights"]["primary_strength"] == (
-        "High repeat purchase behavior"
-    )
-    assert payload["insights"]["recommended_action"] == (
-        "Increase premium placement"
-    )
+    assert payload["insights"]["primary_strength"] == ("High repeat purchase behavior")
+    assert payload["insights"]["recommended_action"] == ("Increase premium placement")
 
 
 def test_get_product_insights_returns_404_for_missing_product(db_client):

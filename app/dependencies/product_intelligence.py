@@ -45,4 +45,3 @@ def get_product_intelligence_service(
     return ProductIntelligenceService(
         repository=repository,
     )
-    
