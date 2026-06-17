@@ -1,4 +1,8 @@
+import pytest
+
 from app.schemas.requests import RankingMetric
+
+pytestmark = pytest.mark.unit
 
 
 def test_get_products_maps_warehouse_health_fields_to_performance_contract(

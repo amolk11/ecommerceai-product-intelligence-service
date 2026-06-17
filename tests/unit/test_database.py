@@ -2,6 +2,8 @@ import pytest
 
 from app.core import database
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.fixture(autouse=True)
 def clear_database_caches():

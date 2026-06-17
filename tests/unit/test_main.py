@@ -8,6 +8,9 @@ from app.main import lifespan
 from app.main import log_requests
 
 
+pytestmark = pytest.mark.unit
+
+
 @pytest.mark.asyncio
 async def test_lifespan_runs_startup_and_shutdown():
     async with lifespan(FastAPI()):

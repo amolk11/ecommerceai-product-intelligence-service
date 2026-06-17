@@ -1,4 +1,8 @@
+import pytest
+
 from app.schemas.requests import RankingMetric
+
+pytestmark = pytest.mark.unit
 
 
 def test_performance_metric_replaces_public_health_metric():

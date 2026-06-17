@@ -1,3 +1,5 @@
+import pytest
+
 from app.dependencies.product_intelligence import (
     get_product_intelligence_repository,
     get_product_intelligence_service,
@@ -6,6 +8,8 @@ from app.repositories.sqlalchemy_product_intelligence_repository import (
     SQLAlchemyProductIntelligenceRepository,
 )
 from app.services.product_intelligence_service import ProductIntelligenceService
+
+pytestmark = pytest.mark.unit
 
 
 def test_get_product_intelligence_repository_builds_sqlalchemy_repository():
