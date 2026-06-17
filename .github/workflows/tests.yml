@@ -23,16 +23,19 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: pip
+          cache-dependency-path: |
+            requirements.txt
+            requirements-dev.txt
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
 
-      - name: Ruff
+      - name: Run Ruff
         run: ruff check app tests
 
-      - name: Black
+      - name: Run Black
         run: black --check app tests
 
   unit:
@@ -50,17 +53,20 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: pip
+          cache-dependency-path: |
+            requirements.txt
+            requirements-dev.txt
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
 
-      - name: Run unit tests
+      - name: Run Unit Tests
         run: |
           pytest -m unit \
-            --cov=app.services \
-            --cov-report=term-missing
+          --cov=app.services \
+          --cov-report=term-missing
 
   contract:
     name: Contract Tests
@@ -77,17 +83,20 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: pip
+          cache-dependency-path: |
+            requirements.txt
+            requirements-dev.txt
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
 
-      - name: Run contract tests
+      - name: Run Contract Tests
         run: |
           pytest -m contract \
-            --cov=app.api \
-            --cov-report=term-missing
+          --cov=app.api \
+          --cov-report=term-missing
 
   integration:
     name: Integration Tests
@@ -107,7 +116,7 @@ jobs:
         ports:
           - 5432:5432
         options: >-
-          --health-cmd pg_isready
+          --health-cmd "pg_isready -U postgres"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
@@ -125,18 +134,21 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: pip
+          cache-dependency-path: |
+            requirements.txt
+            requirements-dev.txt
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
 
-      - name: Run integration tests
+      - name: Run Integration Tests
         run: |
           pytest -m integration \
-            --cov=app.repositories \
-            --cov=app.api \
-            --cov-report=term-missing
+          --cov=app.repositories \
+          --cov=app.api \
+          --cov-report=term-missing
 
   coverage:
     name: Coverage Report
@@ -156,21 +168,24 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: pip
+          cache-dependency-path: |
+            requirements.txt
+            requirements-dev.txt
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
 
-      - name: Generate coverage report
+      - name: Generate Coverage Report
         run: |
           pytest \
-            -m "unit or contract or integration" \
-            --cov=app \
-            --cov-report=xml \
-            --cov-report=term-missing
+          -m "unit or contract or integration" \
+          --cov=app \
+          --cov-report=xml \
+          --cov-report=term-missing
 
-      - name: Upload coverage report
+      - name: Upload Coverage Report
         uses: actions/upload-artifact@v4
         with:
           name: coverage-report
@@ -197,7 +212,7 @@ jobs:
         ports:
           - 5432:5432
         options: >-
-          --health-cmd pg_isready
+          --health-cmd "pg_isready -U postgres"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
@@ -215,11 +230,14 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: pip
+          cache-dependency-path: |
+            requirements.txt
+            requirements-dev.txt
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
 
-      - name: Run E2E tests
+      - name: Run E2E Tests
         run: pytest -m e2e
