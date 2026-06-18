@@ -6,7 +6,6 @@ from app.dependencies.product_intelligence import (
 
 from app.schemas.requests import RankingMetric
 from app.schemas.responses import (
-    ProductInsightsResponse,
     ProductListResponse,
     ProductProfileResponse,
     TopProductsResponse,

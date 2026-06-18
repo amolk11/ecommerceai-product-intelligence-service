@@ -10,7 +10,6 @@ from app.schemas.responses import (
     ProductFacts,
     ProductIdentity,
     ProductInsights,
-    ProductInsightsResponse,
     ProductListItem,
     ProductListResponse,
     ProductProfileResponse,

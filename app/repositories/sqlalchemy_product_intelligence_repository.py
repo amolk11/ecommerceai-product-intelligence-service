@@ -58,7 +58,6 @@ class SQLAlchemyProductIntelligenceRepository(ProductIntelligenceRepository):
 
         return product
 
-
     def get_products(
         self,
         limit: int,
