@@ -100,37 +100,6 @@ class ProductIntelligenceService:
             insights=ProductInsights(
                 primary_strength=record.primary_strength,
                 primary_weakness=record.primary_weakness,
-                recommended_action=record.recommended_action,
-            ),
-        )
-
-    def get_product_insights(
-        self,
-        product_id: int,
-    ) -> ProductInsightsResponse | None:
-
-        logger.debug(
-            "Fetching product insights product_id=%s",
-            product_id,
-        )
-
-        record = self.repository.get_product_insights(
-            product_id=product_id,
-        )
-
-        if record is None:
-            logger.info(
-                "Product insights missing product_id=%s",
-                product_id,
-            )
-            return None
-
-        return ProductInsightsResponse(
-            product_id=record.product_id,
-            insights=ProductInsights(
-                primary_strength=record.primary_strength,
-                primary_weakness=record.primary_weakness,
-                recommended_action=record.recommended_action,
             ),
         )
 

@@ -58,29 +58,6 @@ class SQLAlchemyProductIntelligenceRepository(ProductIntelligenceRepository):
 
         return product
 
-    def get_product_insights(
-        self,
-        product_id: int,
-    ) -> ProductIntelligence | None:
-
-        logger.debug(
-            "Querying product insights product_id=%s",
-            product_id,
-        )
-
-        product = (
-            self.db.query(ProductIntelligence)
-            .filter(ProductIntelligence.product_id == product_id)
-            .first()
-        )
-
-        logger.debug(
-            "Queried product insights product_id=%s found=%s",
-            product_id,
-            product is not None,
-        )
-
-        return product
 
     def get_products(
         self,

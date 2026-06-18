@@ -16,13 +16,6 @@ class ProductIntelligenceRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def get_product_insights(
-        self,
-        product_id: int,
-    ) -> ProductIntelligence | None:
-        raise NotImplementedError
-
-    @abstractmethod
     def get_products(
         self,
         limit: int,

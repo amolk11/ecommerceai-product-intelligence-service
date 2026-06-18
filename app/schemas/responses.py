@@ -62,7 +62,6 @@ class ProductSegments(BaseModel):
 class ProductInsights(BaseModel):
     primary_strength: str
     primary_weakness: str
-    recommended_action: str
 
 
 class ProductProfileResponse(BaseModel):
