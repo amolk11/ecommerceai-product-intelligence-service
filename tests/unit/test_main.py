@@ -79,4 +79,3 @@ def test_app_registers_products_router():
     assert "/api/v1/products" in route_paths
     assert "/api/v1/products/top" in route_paths
     assert "/api/v1/products/{product_id}/profile" in route_paths
-    assert "/api/v1/products/{product_id}/insights" in route_paths

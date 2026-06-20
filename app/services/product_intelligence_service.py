@@ -3,6 +3,9 @@ from app.repositories.interfaces.product_intelligence_repository import (
     ProductIntelligenceRepository,
 )
 
+from app.cache.cache_manager import CacheManager
+from app.cache.cache_key import PROFILE_TTL_SECONDS, product_profile_key
+
 from app.schemas.requests import RankingMetric
 from app.schemas.responses import (
     DepartmentScores,
@@ -29,8 +32,10 @@ class ProductIntelligenceService:
     def __init__(
         self,
         repository: ProductIntelligenceRepository,
+        cache_manager: CacheManager,
     ) -> None:
         self.repository = repository
+        self.cache_manager = cache_manager
 
     def get_product_profile(
         self,
@@ -42,23 +47,34 @@ class ProductIntelligenceService:
             product_id,
         )
 
+        cache_key = product_profile_key(
+            product_id=product_id,
+        )
+
+        cached = self.cache_manager.get(
+            cache_key,
+        )
+
+        if cached is not None:
+            logger.info("Product profile cache hit product_id=%s", product_id)
+
+            return ProductProfileResponse.model_validate(
+                cached,
+            )
+
+        logger.info("Product profile cache miss product_id=%s", product_id)
+
         record = self.repository.get_product_profile(
             product_id=product_id,
         )
 
         if record is None:
-            logger.info(
-                "Product profile missing product_id=%s",
-                product_id,
-            )
+            logger.info("Product profile missing product_id=%s", product_id)
             return None
 
-        logger.debug(
-            "Mapping product profile product_id=%s",
-            product_id,
-        )
+        logger.debug("Mapping product profile product_id=%s", product_id)
 
-        return ProductProfileResponse(
+        response = ProductProfileResponse(
             identity=ProductIdentity(
                 product_id=record.product_id,
                 product_name=record.product_name,
@@ -101,6 +117,20 @@ class ProductIntelligenceService:
                 primary_weakness=record.primary_weakness,
             ),
         )
+
+        self.cache_manager.set(
+            key=cache_key,
+            value=response.model_dump(),
+            ttl=PROFILE_TTL_SECONDS,
+        )
+
+        logger.info(
+            "Cached product profile product_id=%s ttl=%s",
+            product_id,
+            PROFILE_TTL_SECONDS,
+        )
+
+        return response
 
     def get_products(
         self,

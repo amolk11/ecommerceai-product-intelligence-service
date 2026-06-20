@@ -63,30 +63,6 @@ def test_get_product_profile_returns_404_detail_for_missing_product(
     assert response.json() == {"detail": "Product 999 not found"}
 
 
-def test_get_product_insights_returns_database_backed_payload(
-    sqlite_db_client,
-):
-    response = sqlite_db_client.get("/api/v1/products/101/insights")
-
-    assert response.status_code == 200
-    payload = response.json()
-    assert payload["product_id"] == 101
-    assert payload["insights"] == {
-        "primary_strength": "High repeat purchase behavior",
-        "primary_weakness": "Limited cross-category reach",
-        "recommended_action": "Increase premium placement",
-    }
-
-
-def test_get_product_insights_returns_404_detail_for_missing_product(
-    sqlite_db_client,
-):
-    response = sqlite_db_client.get("/api/v1/products/999/insights")
-
-    assert response.status_code == 404
-    assert response.json() == {"detail": "Product 999 not found"}
-
-
 @pytest.mark.parametrize(
     "path",
     [

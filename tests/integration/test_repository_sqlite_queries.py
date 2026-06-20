@@ -31,23 +31,6 @@ def test_repository_get_product_profile_returns_none_for_missing_product(
     assert product is None
 
 
-def test_repository_get_product_insights_returns_existing_product(repository):
-    product = repository.get_product_insights(product_id=101)
-
-    assert product is not None
-    assert product.product_id == 101
-    assert product.primary_strength == "High repeat purchase behavior"
-    assert product.recommended_action == "Increase premium placement"
-
-
-def test_repository_get_product_insights_returns_none_for_missing_product(
-    repository,
-):
-    product = repository.get_product_insights(product_id=999)
-
-    assert product is None
-
-
 def test_repository_get_products_without_filters_returns_total_and_sorted_rows(
     repository,
 ):

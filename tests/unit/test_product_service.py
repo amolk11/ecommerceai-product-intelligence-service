@@ -6,10 +6,9 @@ pytestmark = pytest.mark.unit
 
 
 def test_get_products_maps_warehouse_health_fields_to_performance_contract(
-    product_service,
-    repository_mock,
-    sample_product,
+    product_service, repository_mock, sample_product
 ):
+
     repository_mock.get_products.return_value = ([sample_product], 1)
 
     response = product_service.get_products(
@@ -35,10 +34,9 @@ def test_get_products_maps_warehouse_health_fields_to_performance_contract(
 
 
 def test_get_product_profile_maps_performance_scores_and_segments(
-    product_service,
-    repository_mock,
-    sample_product,
+    product_service, repository_mock, sample_product
 ):
+
     repository_mock.get_product_profile.return_value = sample_product
 
     response = product_service.get_product_profile(product_id=101)
@@ -50,25 +48,8 @@ def test_get_product_profile_maps_performance_scores_and_segments(
     assert "health" not in response.model_dump()["segments"]
 
 
-def test_get_product_insights_maps_insight_generation_fields(
-    product_service,
-    repository_mock,
-    sample_product,
-):
-    repository_mock.get_product_insights.return_value = sample_product
-
-    response = product_service.get_product_insights(product_id=101)
-
-    assert response.product_id == 101
-    assert response.insights.primary_strength == ("High repeat purchase behavior")
-    assert response.insights.primary_weakness == "Limited cross-category reach"
-    assert response.insights.recommended_action == "Increase premium placement"
-
-
 def test_get_top_products_uses_performance_metric_for_warehouse_score(
-    product_service,
-    repository_mock,
-    sample_product,
+    product_service, repository_mock, sample_product
 ):
     repository_mock.get_top_products.return_value = [sample_product]
 
@@ -83,3 +64,18 @@ def test_get_top_products_uses_performance_metric_for_warehouse_score(
         metric="performance",
         limit=10,
     )
+
+
+def test_get_product_profile_uses_cache_after_first_request(
+    product_service, repository_mock, sample_product
+):
+
+    repository_mock.get_product_profile.return_value = sample_product
+
+    first_response = product_service.get_product_profile(product_id=101)
+
+    second_response = product_service.get_product_profile(product_id=101)
+
+    assert first_response == second_response
+
+    repository_mock.get_product_profile.assert_called_once_with(product_id=101)

@@ -17,8 +17,6 @@ from app.main import app
 from app.models.base import Base
 from app.schemas.requests import RankingMetric
 from app.schemas.responses import (
-    ProductInsights,
-    ProductInsightsResponse,
     ProductListItem,
     ProductListResponse,
     ProductProfileResponse,
@@ -28,9 +26,30 @@ from app.schemas.responses import (
 from app.services.product_intelligence_service import (
     ProductIntelligenceService,
 )
+from app.cache.cache_manager import CacheManager
+
 from tests.fixtures.database import prepare_database
 from tests.fixtures.database import seed_products
 from tests.fixtures.products import product_record
+
+
+class FakeCacheManager(CacheManager):
+    def __init__(self) -> None:
+        self.store: dict[str, object] = {}
+
+    def get(self, key: str):
+        return self.store.get(key)
+
+    def set(self, key: str, value, ttl: int) -> None:
+        self.store[key] = value
+
+    def delete(self, key: str) -> None:
+        self.store.pop(key, None)
+
+
+@pytest.fixture
+def cache_manager() -> FakeCacheManager:
+    return FakeCacheManager()
 
 
 @pytest.fixture
@@ -39,8 +58,12 @@ def repository_mock() -> Mock:
 
 
 @pytest.fixture
-def product_service(repository_mock: Mock) -> ProductIntelligenceService:
-    return ProductIntelligenceService(repository=repository_mock)
+def product_service(
+    repository_mock: Mock, cache_manager: FakeCacheManager
+) -> ProductIntelligenceService:
+    return ProductIntelligenceService(
+        repository=repository_mock, cache_manager=cache_manager
+    )
 
 
 @pytest.fixture
@@ -110,14 +133,7 @@ def mock_product_service() -> Mock:
             "recommended_action": "Increase premium placement",
         },
     )
-    service.get_product_insights.return_value = ProductInsightsResponse(
-        product_id=101,
-        insights=ProductInsights(
-            primary_strength="High repeat purchase behavior",
-            primary_weakness="Limited cross-category reach",
-            recommended_action="Increase premium placement",
-        ),
-    )
+
     service.get_top_products.return_value = TopProductsResponse(
         metric=RankingMetric.PERFORMANCE,
         products=[

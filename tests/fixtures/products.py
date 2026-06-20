@@ -34,7 +34,6 @@ def product_record(**overrides):
         "health_segment": "Star Product",
         "primary_strength": "High repeat purchase behavior",
         "primary_weakness": "Limited cross-category reach",
-        "recommended_action": "Increase premium placement",
     }
     values.update(overrides)
     return SimpleNamespace(**values)
