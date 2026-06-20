@@ -4,7 +4,12 @@ from app.repositories.interfaces.product_intelligence_repository import (
 )
 
 from app.cache.cache_manager import CacheManager
-from app.cache.cache_key import PROFILE_TTL_SECONDS, product_profile_key
+from app.cache.cache_key import (
+    PROFILE_TTL_SECONDS,
+    product_profile_key,
+    TOP_PRODUCTS_TTL_SECONDS,
+    top_products_key,
+)
 
 from app.schemas.requests import RankingMetric
 from app.schemas.responses import (
@@ -192,9 +197,21 @@ class ProductIntelligenceService:
         limit: int,
     ) -> TopProductsResponse:
 
-        logger.debug(
-            "Fetching top products metric=%s limit=%s",
-            metric,
+        cache_key = top_products_key(metric=metric.value, limit=limit)
+
+        cached = self.cache_manager.get(cache_key)
+
+        if cached:
+            logger.info(
+                "Top products cache hit metric=%s limit=%s",
+                metric.value,
+                limit,
+            )
+            return TopProductsResponse.model_validate_json(cached)
+
+        logger.info(
+            "Top products cache miss metric=%s limit=%s",
+            metric.value,
             limit,
         )
 
@@ -207,8 +224,8 @@ class ProductIntelligenceService:
             RankingMetric.POPULARITY: "global_popularity_score",
             RankingMetric.LOYALTY: "global_loyalty_score",
             RankingMetric.REACH: "global_reach_score",
-            RankingMetric.BASKET_INFLUENCE: ("global_basket_influence_score"),
-            RankingMetric.PURCHASE_INTENT: ("global_purchase_intent_score"),
+            RankingMetric.BASKET_INFLUENCE: "global_basket_influence_score",
+            RankingMetric.PURCHASE_INTENT: "global_purchase_intent_score",
             RankingMetric.PERFORMANCE: "global_health_score",
         }
 
@@ -224,13 +241,22 @@ class ProductIntelligenceService:
             for index, row in enumerate(rows)
         ]
 
-        logger.debug(
-            "Mapped top products metric=%s count=%s",
-            metric,
-            len(products),
-        )
-
-        return TopProductsResponse(
+        response = TopProductsResponse(
             metric=metric,
             products=products,
         )
+
+        self.cache_manager.set(
+            key=cache_key,
+            value=response.model_dump_json(),
+            ttl=TOP_PRODUCTS_TTL_SECONDS,
+        )
+
+        logger.info(
+            "Cached top products metric=%s limit=%s ttl=%s",
+            metric.value,
+            limit,
+            3600,
+        )
+
+        return response
