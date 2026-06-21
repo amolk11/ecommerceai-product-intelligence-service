@@ -1,0 +1,3 @@
+dependencies = [
+    "ecommerceai-platform-core @ git+https://github.com/amolk11/ecommerceai-platform-core.git@v0.2.1",
+]

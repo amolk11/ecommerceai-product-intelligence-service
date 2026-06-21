@@ -1,22 +1,19 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 
+from app.core.logger import get_logger
+from app.dependencies.auth import get_current_client
 from app.dependencies.product_intelligence import (
     get_product_intelligence_service,
 )
-
 from app.schemas.requests import RankingMetric
 from app.schemas.responses import (
     ProductListResponse,
     ProductProfileResponse,
     TopProductsResponse,
 )
-
 from app.services.product_intelligence_service import (
     ProductIntelligenceService,
 )
-
-from app.core.logger import get_logger
-
 
 logger = get_logger(
     log_name="products",
@@ -55,6 +52,7 @@ def get_products(
         description="Filter by business performance segment.",
         examples=["Star Product"],
     ),
+    current_client: dict = Depends(get_current_client),
     service: ProductIntelligenceService = Depends(
         get_product_intelligence_service,
     ),
@@ -65,9 +63,10 @@ def get_products(
 
     logger.info(
         (
-            "Listing products limit=%s offset=%s department=%s "
-            "aisle=%s performance_segment=%s"
+            "Listing products client_id=%s limit=%s offset=%s "
+            "department=%s aisle=%s performance_segment=%s"
         ),
+        current_client.get("client_id"),
         limit,
         offset,
         department,
@@ -84,7 +83,8 @@ def get_products(
     )
 
     logger.info(
-        "Listed products count=%s total=%s",
+        "Listed products client_id=%s count=%s total=%s",
+        current_client.get("client_id"),
         len(response.items),
         response.total,
     )
@@ -105,6 +105,7 @@ def get_top_products(
         ge=1,
         le=100,
     ),
+    current_client: dict = Depends(get_current_client),
     service: ProductIntelligenceService = Depends(
         get_product_intelligence_service,
     ),
@@ -114,7 +115,8 @@ def get_top_products(
     """
 
     logger.info(
-        "Listing top products metric=%s limit=%s",
+        ("Listing top products client_id=%s " "metric=%s limit=%s"),
+        current_client.get("client_id"),
         metric,
         limit,
     )
@@ -125,7 +127,8 @@ def get_top_products(
     )
 
     logger.info(
-        "Listed top products metric=%s count=%s",
+        ("Listed top products client_id=%s " "metric=%s count=%s"),
+        current_client.get("client_id"),
         metric,
         len(response.products),
     )
@@ -140,6 +143,7 @@ def get_top_products(
 )
 def get_product_profile(
     product_id: int,
+    current_client: dict = Depends(get_current_client),
     service: ProductIntelligenceService = Depends(
         get_product_intelligence_service,
     ),
@@ -148,22 +152,31 @@ def get_product_profile(
     Retrieve a complete product profile.
     """
 
+    logger.info(
+        "Retrieving product profile client_id=%s product_id=%s",
+        current_client.get("client_id"),
+        product_id,
+    )
+
     product = service.get_product_profile(
         product_id=product_id,
     )
 
     if product is None:
         logger.warning(
-            "Product profile not found product_id=%s",
+            ("Product profile not found " "client_id=%s product_id=%s"),
+            current_client.get("client_id"),
             product_id,
         )
+
         raise HTTPException(
             status_code=404,
             detail=f"Product {product_id} not found",
         )
 
     logger.info(
-        "Retrieved product profile product_id=%s",
+        "Retrieved product profile client_id=%s product_id=%s",
+        current_client.get("client_id"),
         product_id,
     )
 

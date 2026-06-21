@@ -27,6 +27,7 @@ from app.services.product_intelligence_service import (
     ProductIntelligenceService,
 )
 from app.cache.cache_manager import CacheManager
+from app.dependencies.auth import get_current_client
 
 from tests.fixtures.database import prepare_database
 from tests.fixtures.database import seed_products
@@ -50,6 +51,14 @@ class FakeCacheManager(CacheManager):
 @pytest.fixture
 def cache_manager() -> FakeCacheManager:
     return FakeCacheManager()
+
+
+@pytest.fixture
+def mock_authenticated_client():
+    return {
+        "client_id": "test-client",
+        "client_name": "Test Client",
+    }
 
 
 @pytest.fixture
@@ -149,10 +158,15 @@ def mock_product_service() -> Mock:
 
 
 @pytest.fixture
-def client(mock_product_service: Mock) -> Generator[TestClient, None, None]:
+def client(
+    mock_product_service,
+    mock_authenticated_client,
+):
     app.dependency_overrides[get_product_intelligence_service] = (
         lambda: mock_product_service
     )
+
+    app.dependency_overrides[get_current_client] = lambda: mock_authenticated_client
 
     with TestClient(app) as test_client:
         yield test_client
@@ -192,11 +206,17 @@ def db_session(test_engine):
 
 
 @pytest.fixture
-def db_client(db_session) -> Generator[TestClient, None, None]:
+def db_client(
+    db_session,
+    mock_authenticated_client,
+) -> Generator[TestClient, None, None]:
+
     def override_get_session():
         yield db_session
 
     app.dependency_overrides[get_session] = override_get_session
+
+    app.dependency_overrides[get_current_client] = lambda: mock_authenticated_client
 
     with TestClient(app) as test_client:
         yield test_client
@@ -224,7 +244,7 @@ def sqlite_test_engine():
 
 
 @pytest.fixture
-def sqlite_db_session(sqlite_test_engine):
+def sqlite_db_session(sqlite_test_engine, mock_authenticated_client):
     session_factory = sessionmaker(
         bind=sqlite_test_engine,
         autoflush=False,
@@ -234,7 +254,6 @@ def sqlite_db_session(sqlite_test_engine):
 
     session = session_factory()
     seed_products(session)
-
     try:
         yield session
     finally:
@@ -242,11 +261,17 @@ def sqlite_db_session(sqlite_test_engine):
 
 
 @pytest.fixture
-def sqlite_db_client(sqlite_db_session) -> Generator[TestClient, None, None]:
+def sqlite_db_client(
+    sqlite_db_session,
+    mock_authenticated_client,
+) -> Generator[TestClient, None, None]:
+
     def override_get_session():
         yield sqlite_db_session
 
     app.dependency_overrides[get_session] = override_get_session
+
+    app.dependency_overrides[get_current_client] = lambda: mock_authenticated_client
 
     with TestClient(app) as test_client:
         yield test_client
