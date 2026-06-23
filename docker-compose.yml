@@ -1,0 +1,24 @@
+services:
+  product-intelligence:
+    build: .
+    container_name: product-intelligence
+
+    ports:
+      - "8000:8000"
+
+    env_file:
+      - .env.docker
+
+    depends_on:
+      - redis
+
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: product-intelligence-redis
+
+    ports:
+      - "6379:6379"
+
+    restart: unless-stopped
