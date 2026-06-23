@@ -1,4 +1,5 @@
 from app.core.logger import get_logger
+from app.core.config import settings
 from app.repositories.interfaces.product_intelligence_repository import (
     ProductIntelligenceRepository,
 )
@@ -9,6 +10,11 @@ from app.cache.cache_key import (
     product_profile_key,
     TOP_PRODUCTS_TTL_SECONDS,
     top_products_key,
+)
+
+from app.metrics.metrics import (
+    CACHE_HITS,
+    CACHE_MISSES,
 )
 
 from app.schemas.requests import RankingMetric
@@ -56,18 +62,27 @@ class ProductIntelligenceService:
             product_id=product_id,
         )
 
-        cached = self.cache_manager.get(
-            cache_key,
-        )
-
-        if cached is not None:
-            logger.info("Product profile cache hit product_id=%s", product_id)
-
-            return ProductProfileResponse.model_validate(
-                cached,
+        if settings.cache_enabled:
+            cached = self.cache_manager.get(
+                cache_key,
             )
 
-        logger.info("Product profile cache miss product_id=%s", product_id)
+            if cached is not None:
+                CACHE_HITS.labels(
+                    endpoint="product_profile",
+                ).inc()
+
+                logger.info("Product profile cache hit product_id=%s", product_id)
+
+                return ProductProfileResponse.model_validate(
+                    cached,
+                )
+
+            CACHE_MISSES.labels(
+                endpoint="product_profile",
+            ).inc()
+
+            logger.info("Product profile cache miss product_id=%s", product_id)
 
         record = self.repository.get_product_profile(
             product_id=product_id,
@@ -122,18 +137,18 @@ class ProductIntelligenceService:
                 primary_weakness=record.primary_weakness,
             ),
         )
+        if settings.cache_enabled:
+            self.cache_manager.set(
+                key=cache_key,
+                value=response.model_dump(),
+                ttl=PROFILE_TTL_SECONDS,
+            )
 
-        self.cache_manager.set(
-            key=cache_key,
-            value=response.model_dump(),
-            ttl=PROFILE_TTL_SECONDS,
-        )
-
-        logger.info(
-            "Cached product profile product_id=%s ttl=%s",
-            product_id,
-            PROFILE_TTL_SECONDS,
-        )
+            logger.info(
+                "Cached product profile product_id=%s ttl=%s",
+                product_id,
+                PROFILE_TTL_SECONDS,
+            )
 
         return response
 
@@ -199,21 +214,31 @@ class ProductIntelligenceService:
 
         cache_key = top_products_key(metric=metric.value, limit=limit)
 
-        cached = self.cache_manager.get(cache_key)
+        if settings.cache_enabled:
+            cached = self.cache_manager.get(cache_key)
 
-        if cached:
+            if cached is not None:
+                CACHE_HITS.labels(
+                    endpoint="top_products",
+                ).inc()
+
+                logger.info(
+                    "Top products cache hit metric=%s limit=%s",
+                    metric.value,
+                    limit,
+                )
+
+                return TopProductsResponse.model_validate_json(cached)
+
+            CACHE_MISSES.labels(
+                endpoint="top_products",
+            ).inc()
+
             logger.info(
-                "Top products cache hit metric=%s limit=%s",
+                "Top products cache miss metric=%s limit=%s",
                 metric.value,
                 limit,
             )
-            return TopProductsResponse.model_validate_json(cached)
-
-        logger.info(
-            "Top products cache miss metric=%s limit=%s",
-            metric.value,
-            limit,
-        )
 
         rows = self.repository.get_top_products(
             metric=metric.value,
@@ -246,17 +271,18 @@ class ProductIntelligenceService:
             products=products,
         )
 
-        self.cache_manager.set(
-            key=cache_key,
-            value=response.model_dump_json(),
-            ttl=TOP_PRODUCTS_TTL_SECONDS,
-        )
+        if settings.cache_enabled:
+            self.cache_manager.set(
+                key=cache_key,
+                value=response.model_dump_json(),
+                ttl=TOP_PRODUCTS_TTL_SECONDS,
+            )
 
-        logger.info(
-            "Cached top products metric=%s limit=%s ttl=%s",
-            metric.value,
-            limit,
-            3600,
-        )
+            logger.info(
+                "Cached top products metric=%s limit=%s ttl=%s",
+                metric.value,
+                limit,
+                TOP_PRODUCTS_TTL_SECONDS,
+            )
 
         return response

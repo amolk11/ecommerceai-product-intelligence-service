@@ -6,6 +6,13 @@ from platform_core.auth import validate_api_key
 from platform_core.database import get_platform_engine
 
 from app.core.logger import get_logger
+from app.metrics.metrics import (
+    AUTH_REQUESTS_TOTAL,
+    AUTH_SUCCESS_TOTAL,
+    AUTH_MISSING_API_KEY_TOTAL,
+    AUTH_INVALID_API_KEY_TOTAL,
+    AUTH_SERVICE_ERRORS_TOTAL,
+)
 
 logger = get_logger(
     log_name="authentication",
@@ -31,9 +38,13 @@ def get_current_client(
     ),
 ) -> dict:
 
+    AUTH_REQUESTS_TOTAL.inc()
+
     logger.debug("Authentication request received")
 
     if not x_api_key:
+        AUTH_MISSING_API_KEY_TOTAL.inc()
+
         logger.warning("Authentication failed reason=missing_api_key")
 
         raise HTTPException(
@@ -53,6 +64,8 @@ def get_current_client(
             )
 
     except Exception:
+        AUTH_SERVICE_ERRORS_TOTAL.inc()
+
         logger.exception("Authentication validation error")
 
         raise HTTPException(
@@ -61,12 +74,15 @@ def get_current_client(
         )
 
     if client is None:
+        AUTH_INVALID_API_KEY_TOTAL.inc()
+
         logger.warning("Authentication failed reason=invalid_api_key")
 
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid API key",
         )
+    AUTH_SUCCESS_TOTAL.inc()
 
     logger.info(
         "Authentication successful client_id=%s client_name=%s",

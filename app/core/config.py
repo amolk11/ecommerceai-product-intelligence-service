@@ -1,4 +1,5 @@
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings import BaseSettings
+from pydantic_settings import SettingsConfigDict
 
 
 class Settings(BaseSettings):
@@ -15,6 +16,9 @@ class Settings(BaseSettings):
     cache_ttl: int = 3600
 
     startup_validation_enabled: bool = True
+
+    metrics_enabled: bool = True
+    metrics_path: str = "/api/v1/metrics"
 
     log_level: str = "INFO"
     log_dir: str = "logs"

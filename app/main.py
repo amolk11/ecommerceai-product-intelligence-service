@@ -7,6 +7,9 @@ from fastapi import Request
 
 from app.api.v1.products import router as products_router
 from app.api.v1.health import router as health_router
+from app.api.v1.metrics import router as metrics_router
+from app.metrics.metrics import REQUEST_COUNT
+from app.metrics.metrics import REQUEST_DURATION
 from app.core.config import settings
 from app.core.logger import get_logger
 from app.core.logger import reset_request_id
@@ -46,6 +49,7 @@ async def log_requests(request: Request, call_next):
     request_id_token = set_request_id(request_id)
 
     started_at = time.perf_counter()
+    status_code = 500
 
     try:
         logger.info(
@@ -57,28 +61,42 @@ async def log_requests(request: Request, call_next):
 
         response = await call_next(request)
 
-        duration_ms = (time.perf_counter() - started_at) * 1000
+        status_code = response.status_code
         response.headers["x-request-id"] = request_id
 
-        logger.info(
-            ("Request completed method=%s path=%s " "status_code=%s duration_ms=%.2f"),
+        return response
+
+    except Exception:
+        logger.exception(
+            "Request failed method=%s path=%s",
             request.method,
             request.url.path,
-            response.status_code,
+        )
+        raise
+
+    finally:
+        duration_seconds = time.perf_counter() - started_at
+        duration_ms = duration_seconds * 1000
+
+        REQUEST_COUNT.labels(
+            method=request.method,
+            path=request.url.path,
+            status_code=str(status_code),
+        ).inc()
+
+        REQUEST_DURATION.labels(
+            method=request.method,
+            path=request.url.path,
+        ).observe(duration_seconds)
+
+        logger.info(
+            "Request completed method=%s path=%s status_code=%s duration_ms=%.2f",
+            request.method,
+            request.url.path,
+            status_code,
             duration_ms,
         )
 
-        return response
-    except Exception:
-        duration_ms = (time.perf_counter() - started_at) * 1000
-        logger.exception(
-            "Request failed method=%s path=%s duration_ms=%.2f",
-            request.method,
-            request.url.path,
-            duration_ms,
-        )
-        raise
-    finally:
         reset_request_id(request_id_token)
 
 
@@ -90,4 +108,8 @@ app.include_router(
 app.include_router(
     products_router,
     prefix="/api/v1",
+)
+
+app.include_router(
+    metrics_router,
 )
