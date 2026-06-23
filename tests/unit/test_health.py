@@ -1,9 +1,13 @@
+import pytest
+
 from unittest.mock import MagicMock
 from unittest.mock import patch
 
 from fastapi.testclient import TestClient
 
 from app.main import app
+
+pytestmark = pytest.mark.unit
 
 client = TestClient(app)
 
