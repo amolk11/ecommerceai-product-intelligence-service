@@ -1,9 +1,12 @@
 import json
+import pytest
 from unittest.mock import MagicMock
 
 import redis
 
 from app.cache.redis_cache import RedisCache
+
+pytestmark = pytest.mark.unit
 
 
 def test_get_returns_deserialized_value():

@@ -6,6 +6,8 @@ from fastapi import HTTPException
 
 from app.dependencies.auth import get_current_client
 
+pytestmark = pytest.mark.unit
+
 
 def test_get_current_client_raises_when_api_key_missing():
     with pytest.raises(HTTPException) as exc:
