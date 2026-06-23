@@ -6,6 +6,7 @@ from fastapi import FastAPI
 from fastapi import Request
 
 from app.api.v1.products import router as products_router
+from app.api.v1.health import router as health_router
 from app.core.config import settings
 from app.core.logger import get_logger
 from app.core.logger import reset_request_id
@@ -80,6 +81,11 @@ async def log_requests(request: Request, call_next):
     finally:
         reset_request_id(request_id_token)
 
+
+app.include_router(
+    health_router,
+    prefix="/api/v1",
+)
 
 app.include_router(
     products_router,
