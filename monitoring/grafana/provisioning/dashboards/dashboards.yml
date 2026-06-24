@@ -1,12 +1,12 @@
 apiVersion: 1
 
 providers:
-  - name: Product Intelligence
+  - name: "Product Intelligence Service"
     orgId: 1
-    folder: ""
+    folder: "Product Intelligence Service"
     type: file
     disableDeletion: false
+    editable: true
 
     options:
       path: /var/lib/grafana/dashboards
-      

@@ -5,21 +5,30 @@ from uuid import uuid4
 from fastapi import FastAPI
 from fastapi import Request
 
-from app.api.v1.products import router as products_router
 from app.api.v1.health import router as health_router
 from app.api.v1.metrics import router as metrics_router
-from app.metrics.metrics import REQUEST_COUNT
-from app.metrics.metrics import REQUEST_DURATION
+from app.api.v1.products import router as products_router
 from app.core.config import settings
 from app.core.logger import get_logger
 from app.core.logger import reset_request_id
 from app.core.logger import set_request_id
+from app.metrics.metrics import REQUEST_COUNT
+from app.metrics.metrics import REQUEST_DURATION
 
 
 logger = get_logger(
     log_name="application",
     log_folder="system",
 )
+
+
+def get_metrics_path(request: Request) -> str:
+    route = request.scope.get("route")
+
+    if route is not None:
+        return route.path
+
+    return request.url.path
 
 
 @asynccontextmanager
@@ -33,7 +42,10 @@ async def lifespan(app: FastAPI):
 
     yield
 
-    logger.info("Application shutdown app=%s", settings.app_name)
+    logger.info(
+        "Application shutdown app=%s",
+        settings.app_name,
+    )
 
 
 app = FastAPI(
@@ -45,7 +57,11 @@ app = FastAPI(
 
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
-    request_id = request.headers.get("x-request-id", str(uuid4()))
+    request_id = request.headers.get(
+        "x-request-id",
+        str(uuid4()),
+    )
+
     request_id_token = set_request_id(request_id)
 
     started_at = time.perf_counter()
@@ -78,15 +94,17 @@ async def log_requests(request: Request, call_next):
         duration_seconds = time.perf_counter() - started_at
         duration_ms = duration_seconds * 1000
 
+        metrics_path = get_metrics_path(request)
+
         REQUEST_COUNT.labels(
             method=request.method,
-            path=request.url.path,
+            path=metrics_path,
             status_code=str(status_code),
         ).inc()
 
         REQUEST_DURATION.labels(
             method=request.method,
-            path=request.url.path,
+            path=metrics_path,
         ).observe(duration_seconds)
 
         logger.info(
