@@ -79,4 +79,3 @@ class BaselineUser(HttpUser):
             f"{API_TOP_PRODUCTS}?metric={TOP_PRODUCTS_METRIC}&limit={TOP_PRODUCTS_LIMIT}",
             name="GET /products/top",
         )
-        
