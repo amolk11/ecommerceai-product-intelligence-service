@@ -17,17 +17,9 @@ Endpoint Distribution:
     - GET /api/v1/products/top              -> 15%
 """
 
-from pathlib import Path
-import sys
 from random import choice
 
-from locust import HttpUser
-from locust import between
-from locust import task
-
-ROOT = Path(__file__).resolve().parent.parent
-if str(ROOT) not in sys.path:
-    sys.path.insert(0, str(ROOT))
+from locust import HttpUser, task, between
 
 from config import API_KEY
 from test_data import (
